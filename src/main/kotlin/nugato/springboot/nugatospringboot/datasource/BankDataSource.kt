@@ -1,0 +1,7 @@
+package nugato.springboot.nugatospringboot.datasource
+
+import nugato.springboot.nugatospringboot.model.Bank
+
+interface BankDataSource {
+    fun getBanks(): Collection<Bank>
+}
