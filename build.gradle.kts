@@ -16,15 +16,16 @@ repositories {
 }
 
 dependencies {
-	annotationProcessor("org.springframework.boot:spring-boot-configuration-processor:2.5.6")
+	annotationProcessor("org.springframework.boot:spring-boot-configuration-processor:2.6.1")
 
-	implementation("org.springframework.boot:spring-boot-starter-web:2.5.6")
+	implementation("org.springframework.boot:spring-boot-starter-web:2.6.1")
 	implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.13.0")
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 	implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
 
-	testImplementation("org.springframework.boot:spring-boot-starter-test:2.5.6")
-	testImplementation("com.willowtreeapps.assertk:assertk-jvm:0.24")
+	testImplementation("org.springframework.boot:spring-boot-starter-test:2.6.1")
+	testImplementation("com.willowtreeapps.assertk:assertk-jvm:0.25")
+	testImplementation("io.mockk:mockk:1.12.1")
 }
 
 tasks.withType<KotlinCompile> {
