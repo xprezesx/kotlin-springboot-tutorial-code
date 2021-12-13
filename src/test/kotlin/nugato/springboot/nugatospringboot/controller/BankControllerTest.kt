@@ -122,4 +122,52 @@ internal class BankControllerTest @Autowired constructor(
                 }
         }
     }
+
+    @Nested
+    @DisplayName("PATCH /api/banks")
+    @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+    inner class PatchExistingBank {
+
+        @Test
+        fun `should update an exisitng bank`() {
+            // given
+            val updatedBank = Bank("123", 2.0, 2)
+
+            // when/then
+            val performPost = mockMvc.post(baseUrl) {
+                this.contentType = MediaType.APPLICATION_JSON
+                this.content = objectMapper.writeValueAsString(updatedBank)
+            }
+
+            performPost
+                .andDo { print() }
+                .andExpect {
+                    status { isOk() }
+                    content { contentType(MediaType.APPLICATION_JSON) }
+                    jsonPath("$.accountNumber") { value("abc123") }
+                    jsonPath("$.trust") { value("31.415") }
+                    jsonPath("$.transactionFee") { value("2") }
+                }
+        }
+
+        @Test
+        fun `should return BAD REQUEST if bank with given account number already exists`() {
+            // given
+            val invalidBank = Bank("123", 31.415, 2)
+
+            // when/then
+            val performPost = mockMvc.post(baseUrl) {
+                this.contentType = MediaType.APPLICATION_JSON
+                this.content = objectMapper.writeValueAsString(invalidBank)
+            }
+
+
+            // then
+            performPost
+                .andDo { print() }
+                .andExpect {
+                    status { isBadRequest() }
+                }
+        }
+    }
 }
