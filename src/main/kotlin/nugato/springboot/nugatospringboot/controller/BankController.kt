@@ -4,6 +4,7 @@ import nugato.springboot.nugatospringboot.model.Bank
 import nugato.springboot.nugatospringboot.service.BankService
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PatchMapping
@@ -30,7 +31,7 @@ class BankController(private val service: BankService) {
     fun getBanks(): Collection<Bank> = service.getBanks()
 
     @GetMapping("/{accountNumber}")
-    fun getBank(@PathVariable accountNumber: String) = service.getBank(accountNumber)
+    fun getBank(@PathVariable accountNumber: String): Bank = service.getBank(accountNumber)
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
@@ -38,4 +39,8 @@ class BankController(private val service: BankService) {
 
     @PatchMapping
     fun updateBank(@RequestBody bank: Bank): Bank = service.updateBank(bank)
+
+    @DeleteMapping("/{accountNumber}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    fun deleteBank(@PathVariable accountNumber: String) = service.deleteBank(accountNumber)
 }
