@@ -12,6 +12,7 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.get
+import org.springframework.test.web.servlet.patch
 import org.springframework.test.web.servlet.post
 
 @SpringBootTest
@@ -31,7 +32,6 @@ internal class BankControllerTest @Autowired constructor(
         fun `should return all banks`() {
             // when/then
             mockMvc.get(baseUrl)
-                .andDo { print() }
                 .andExpect {
                     status { isOk() }
                     content { contentType(MediaType.APPLICATION_JSON) }
@@ -52,7 +52,6 @@ internal class BankControllerTest @Autowired constructor(
 
             // when/then
             mockMvc.get("$baseUrl/$accountNumber")
-                .andDo { print() }
                 .andExpect {
                     status { isOk() }
                     content { contentType(MediaType.APPLICATION_JSON) }
@@ -68,7 +67,6 @@ internal class BankControllerTest @Autowired constructor(
 
             // when/then
             mockMvc.get("$baseUrl/$accountNumber")
-                .andDo { print() }
                 .andExpect {
                     status { isNotFound() }
                 }
@@ -92,13 +90,17 @@ internal class BankControllerTest @Autowired constructor(
             }
 
             performPost
-                .andDo { print() }
                 .andExpect {
                     status { isCreated() }
-                    content { contentType(MediaType.APPLICATION_JSON) }
-                    jsonPath("$.accountNumber") { value("abc123") }
-                    jsonPath("$.trust") { value("31.415") }
-                    jsonPath("$.transactionFee") { value("2") }
+                    content {
+                        contentType(MediaType.APPLICATION_JSON)
+                        json(objectMapper.writeValueAsString(newBank))
+                    }
+                }
+
+            mockMvc.get("$baseUrl/${newBank.accountNumber}")
+                .andExpect {
+                    content { json(objectMapper.writeValueAsString(newBank)) }
                 }
         }
 
@@ -113,10 +115,8 @@ internal class BankControllerTest @Autowired constructor(
                 this.content = objectMapper.writeValueAsString(invalidBank)
             }
 
-
             // then
             performPost
-                .andDo { print() }
                 .andExpect {
                     status { isBadRequest() }
                 }
@@ -134,39 +134,41 @@ internal class BankControllerTest @Autowired constructor(
             val updatedBank = Bank("123", 2.0, 2)
 
             // when/then
-            val performPost = mockMvc.post(baseUrl) {
+            val performPatch = mockMvc.patch(baseUrl) {
                 this.contentType = MediaType.APPLICATION_JSON
                 this.content = objectMapper.writeValueAsString(updatedBank)
             }
 
-            performPost
-                .andDo { print() }
+            performPatch
                 .andExpect {
                     status { isOk() }
-                    content { contentType(MediaType.APPLICATION_JSON) }
-                    jsonPath("$.accountNumber") { value("abc123") }
-                    jsonPath("$.trust") { value("31.415") }
-                    jsonPath("$.transactionFee") { value("2") }
+                    content {
+                        contentType(MediaType.APPLICATION_JSON)
+                        json(objectMapper.writeValueAsString(updatedBank))
+                    }
+                }
+
+            mockMvc.get("$baseUrl/${updatedBank.accountNumber}")
+                .andExpect {
+                    content { json(objectMapper.writeValueAsString(updatedBank)) }
                 }
         }
-
+        
         @Test
-        fun `should return BAD REQUEST if bank with given account number already exists`() {
+        fun `should return BAD REQUEST if no bank with given account number exists`() {
             // given
-            val invalidBank = Bank("123", 31.415, 2)
-
-            // when/then
-            val performPost = mockMvc.post(baseUrl) {
+            val invalidBank = Bank("does_not_exist", 1.0, 1)
+        
+            // when
+            val performPatch = mockMvc.patch(baseUrl) {
                 this.contentType = MediaType.APPLICATION_JSON
                 this.content = objectMapper.writeValueAsString(invalidBank)
             }
-
-
+        
             // then
-            performPost
-                .andDo { print() }
+            performPatch
                 .andExpect {
-                    status { isBadRequest() }
+                    status { isNotFound() }
                 }
         }
     }
